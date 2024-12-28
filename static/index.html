@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text to Speech with AWS Polly</title>
+  <style>
+    /* Add a background image to the body */
+    body {
+      font-family: Arial, sans-serif;
+      background: url('https://images.unsplash.com/photo-1548495117-1791ceaf633c?q=80&w=2874&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    /* Styling for the content container */
+    .container {
+      background: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      width: 400px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      resize: none;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #responseContainer {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    .error {
+      color: #d9534f;
+    }
+
+    .success {
+      color: #5bc0de;
+    }
+
+    .audio-controls {
+      margin-top: 20px;
+    }
+
+    .play-button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+
+    .play-button:hover {
+      background-color: #218838;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Text-to-Speech with AWS Polly</h1>
+    <textarea id="textInput" placeholder="Enter text here"></textarea>
+    <button onclick="convertToSpeech()">Convert to Speech</button>
+
+    <div id="responseContainer"></div>
+
+    <div class="audio-controls" id="audioControls" style="display: none;">
+      <button class="play-button" id="playButton" onclick="playAudio()">Play Audio</button>
+    </div>
+  </div>
+
+  <script>
+    let audioUrl = '';
+
+    function convertToSpeech() {
+      const text = document.getElementById('textInput').value;
+
+      if (!text) {
+        alert('Please enter some text');
+        return;
+      }
+
+      //const apiUrl = 'https://dv8mdtp0ek.execute-api.us-east-1.amazonaws.com/Prod/synthesize';
+      const apiUrl = "${API_ENDPOINT}" + "/synthesize";
+      console.log("api_url: " + apiUrl)
+      // Disable button to prevent repeated clicks
+      document.querySelector('button').disabled = true;
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: text })  // Passing the entered text as JSON
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('HTTP error!! Status:' + response.status);
+        }
+        return response.json();  // Parse the main response JSON
+      })
+      .then(data => {
+        const responseBody = JSON.parse(data.body);  // Parse the body JSON string
+
+        if (responseBody.audio) {
+          // Base64 decode the audio data and create an audio blob
+          const audioData = atob(responseBody.audio);
+          const audioBlob = new Blob([new Uint8Array(audioData.split("").map(char => char.charCodeAt(0)))], { type: 'audio/mp3' });
+          audioUrl = URL.createObjectURL(audioBlob);
+
+          // Enable play button
+          document.getElementById('audioControls').style.display = 'block';
+          document.getElementById('responseContainer').innerHTML = `<p class="success">Audio is ready! Click play to hear it.</p>`;
+        } else {
+          document.getElementById('responseContainer').innerHTML = `<p class="error">Error: No audio data returned.</p>`;
+        }
+
+        // Re-enable the button after request
+        document.querySelector('button').disabled = false;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('responseContainer').innerHTML = '<p class="error">Error generating speech: ' + error.message + '</p>';
+        document.querySelector('button').disabled = false;
+      });
+    }
+
+    function playAudio() {
+      if (audioUrl) {
+        const audio = new Audio(audioUrl);
+        audio.play();
+      } else {
+        alert('No audio available');
+      }
+    }
+  </script>
+
+</body>
+</html>
