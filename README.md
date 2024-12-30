@@ -28,9 +28,10 @@ project-directory
 │   ├── TextToSpeechLambda.py
 ├── static
 │   └── index.html
-├── main.tf
-├── outputs.tf
-├── variables.tf
+├── terraform
+│   └── main.tf
+│   └── variables.tf
+│   └── outputs.tf
 ├── .gitignore
 └── README.md
 ```
