@@ -4,8 +4,7 @@ import base64
 
 def lambda_handler(event, context):
     # Extract the text input from the event body (assuming it's passed as JSON)
-    body = json.loads(event['body'])
-    text = body.get('text')  # Use the lowercase key 'text' as per your curl example
+    text = event.get('text')  # Use the lowercase key 'text' as per your curl example
     if not text:
         return {
             'statusCode': 400,
