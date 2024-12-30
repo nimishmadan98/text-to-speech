@@ -58,23 +58,6 @@ terraform apply
 ### 4. Access the Application
 Visit the S3 bucket's website URL or use the provided API Gateway endpoint to interact with the application.
 
-## Troubleshooting
-### Common Errors
-1. **CORS Issues**: Ensure that the CORS settings in API Gateway are correctly configured in Terraform.
-2. **Lambda Deployment Issues**: Confirm the Lambda ZIP file includes all dependencies and is properly uploaded.
-3. **Terraform Errors**: Check for resource name conflicts or invalid configurations in the `.tf` files.
-
-### Debugging Tips
-- Use `terraform plan` to review changes before applying.
-- Check the AWS Console for detailed logs in CloudWatch.
-
-## Git Commands
-### Add and Commit Changes
-```bash
-git add .
-git status
-git commit -m "Initial commit for text-to-speech application"
-```
 
 ### Push to Repository
 ```bash
